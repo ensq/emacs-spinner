@@ -27,21 +27,23 @@
      .':ox0XNWWWWWWWNX0kl;.               ':ok0XNWWWWWWNX0kdc;..\n\
        ..,:codddddddol:,.                  ..,:loddddddol:;..")
 
-(defun spin ()
+(defun spin (for-seconds)
+  (let ((seconds-left for-seconds)
+        (min-frametime 0.1))
+    (while (> seconds-left 0)
+      (reverse-region (point-min) (point-max))
+      (let ((until-next-frame (+ min-frametime (/ 1 seconds-left))))
+        (sit-for until-next-frame)
+        (setq seconds-left (- seconds-left until-next-frame)))))
+  (message "You spun for %s seconds. %s" for-seconds
+           (if (> for-seconds 45) "Wow!" "")))
+
+(defun fidget ()
   (interactive)
-  (let ((buffer (generate-new-buffer "spinner"))
-        (spin-for-seconds (random 60))
-        (min-delay 0.1))
+  (let ((buffer (generate-new-buffer "spinner")))
     (switch-to-buffer buffer)
     (insert spinner)
-    (let ((seconds-left spin-for-seconds))
-      (while (> seconds-left 0)
-        (reverse-region 0 (point-max))
-        (let ((delay (+ min-delay (/ 1 seconds-left))))
-          (sit-for delay)
-          (setq seconds-left (- seconds-left delay)))))
-    (kill-buffer buffer)
-    (message "You spinned for %s seconds. %s" spin-for-seconds
-             (if (> spin-for-seconds 45) "Wow!" ""))))
+    (spin (random 60))
+    (kill-buffer buffer)))
 
-(global-set-key (kbd "<f10>") 'spin)
+(global-set-key (kbd "<f10>") 'fidget)
